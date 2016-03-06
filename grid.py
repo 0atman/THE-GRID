@@ -73,25 +73,25 @@ class Player(object):
 
     def north(self):
         remove_from_room(p)
-        self.x = self.x + 1
+        self.y = self.y + 1
         add_to_room(p)
         self.status()
 
     def south(self):
         remove_from_room(p)
-        self.x = self.x - 1
+        self.y = self.y - 1
         add_to_room(p)
         self.status()
 
     def east(self):
         remove_from_room(p)
-        self.y = self.y + 1
+        self.x = self.x + 1
         add_to_room(p)
         self.status()
 
     def west(self):
         remove_from_room(p)
-        self.y = self.y - 1
+        self.x = self.x - 1
         add_to_room(p)
         self.status()
 
@@ -107,6 +107,21 @@ class Player(object):
         add_to_room(self)
 
 
+def get_room(x, y):
+    room_raw = get(
+        'GRID:%s,%s' % (str(x), str(y))
+    )
+    return json.loads(room_raw) if room_raw else {'players': []}
+
+
+def scan():
+    for y in reversed(range(0, 10)):
+        print([
+            len(get_room(x, y)['players'])
+            for x in range(0, 10)
+        ])
+
+
 if __name__ == '__main__':
 
     p = Player()
@@ -119,10 +134,11 @@ if __name__ == '__main__':
       'south': p.south,
       'east': p.east,
       'west': p.west,
+      'scan': scan
       }
     try:
         while(True):
-            name = input("What is your character's name? ")
+            name = input("What is your name chummer? ")
             password = getpass()
             if get("AUTH:%s" % name) == password:
                 print("LOGIN OK")
@@ -131,7 +147,7 @@ if __name__ == '__main__':
             elif get("AUTH:%s" % name):
                 print("PASSWORD INCORRECT")
             else:
-                register = input("No existing character with that name, register? Y/N: ")
+                register = input("No one here with that name, register? Y/N: ")
                 if register.lower() in ['yes', 'y']:
                     put('AUTH:%s' % name, password)
                     print("%s registered and logged in.", name)
@@ -158,6 +174,7 @@ if __name__ == '__main__':
             if not commandFound:
                 if args[0] == 'debug' and p.name == 'oatman':
                     import ipdb; ipdb.set_trace()
-                print("SYNTAX ERROR")
-    except:
+                print("SYNTAX ERROR (type 'help' for commands)")
+    except Exception as e:
+        print(e)
         p.quit()
