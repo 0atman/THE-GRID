@@ -51,7 +51,7 @@ class Player(object):
         self.health = 100
         self.x = 0
         self.y = 0
-        self.file_store = []
+        self.note_store = []
 
     def quit(self, *args):
         print("\n%s jacks out of THE GRID. Goodbye." % self.name)
@@ -67,6 +67,9 @@ class Player(object):
         room_data['players'].remove(p.name)
         if room_data['players']:
             print("HERE: " + ", ".join(room_data['players']))
+        if room_data.get('data'):
+                for n, datum in enumerate(room_data.get('data')):
+                    print("DATA #" + str(n) + " " + datum.split('\n')[0])
 
     def north(self, *args):
         remove_from_room(p)
@@ -92,8 +95,8 @@ class Player(object):
         add_to_room(p)
         self.status()
 
-    def writefile(self):
-        print("Write your file below, to finish put a period '.' on a line by itself")
+    def writenote(self):
+        print("Write your note below, to finish put a period '.' on a line by itself")
         input_list = []
 
         while True:
@@ -102,30 +105,63 @@ class Player(object):
                 break
             else:
                 input_list.append(input_str)
-        self.file_store.append("\n".join(input_list))
+        self.note_store.append("\n".join(input_list))
         self.save()
 
-    def files(self, *args):
+    def notes(self, *args):
         if args:
             if args[0].lower() in ['new', 'create', 'write', 'add']:
-                self.writefile()
+                self.writenote()
                 return
             if args[0].lower() in ['delete', 'del', 'rm']:
                 try:
-                    del self.file_store[int(args[1])]
+                    del self.note_store[int(args[1])]
                     self.save()
                 except ValueError:
-                    print("Bad file ID.")
+                    print("Bad note ID.")
                 except IndexError:
-                    print("Can't find that file ID")
+                    print("Can't find that note ID")
                 return
-        if not self.__dict__.get('file_store'):
-            self.file_store = []
+            if args[0].lower() in ['drop']:
+                try:
+                    dropped_note = self.note_store[int(args[1])]
+                    del self.note_store[int(args[1])]
+                    self.save()
+                    room_raw = get(
+                        'GRID:%s,%s' % (str(p.x), str(p.y))
+                    )
+                    room_data = json.loads(room_raw)
+                    if not room_data.get('data'):
+                        room_data['data'] = []
+                    room_data['data'].append(dropped_note)
+                    put(
+                        'GRID:%s,%s' % (str(p.x), str(p.y)),
+                        json.dumps(room_data)
+                    )
+                except ValueError:
+                    raise #print("Bad note ID.")
+                except IndexError:
+                    raise # print("Can't find that note ID")
+                return
+            if len(args) == 1:
+                try:
+                    print(
+                        "note #" +
+                        str(args[0]) + " " +
+                        self.note_store[int(args[0])]
+                    )
+                    return
+                except ValueError:
+                    print("Bad note ID.")
+                    return
+                except IndexError:
+                    print("Can't find that note ID")
+                    return
+        if not self.__dict__.get('note_store'):
+            self.note_store = []
             self.save()
-        for n, file in enumerate(self.file_store):
-            print('')
-            print("file #" + str(n))
-            print(file)
+        for n, note in enumerate(self.note_store):
+            print("note #" + str(n) + " " + note.split('\n')[0])
 
     def save(self):
         put('PLAYER:%s' % self.name, json.dumps(self.__dict__))
@@ -185,7 +221,7 @@ if __name__ == '__main__':
       'east': p.east,
       'west': p.west,
       'scan': scan,
-      'files': p.files,
+      'notes': p.notes,
       }
     try:
         while(True):
