@@ -98,6 +98,11 @@ class Player(object):
         if new:
             put('PLAYER:%s' % p.name, json.dumps(p.__dict__))
         p.__dict__ = json.loads(get('PLAYER:%s' % p.name))
+
+        if p.name in get('GRID:%s,%s' % (str(p.x), str(p.y))):
+            print("Already logged in. If this is in error, please contact oatman@bgr0.com.")
+            raise
+
         add_to_room(self)
 
 
@@ -132,7 +137,6 @@ if __name__ == '__main__':
                     p.name = name
                     add_to_room(p)
                     break
-
 
         p.initialise()
 
