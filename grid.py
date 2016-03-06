@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import requests
 from getpass import getpass
 import json
