@@ -257,7 +257,7 @@ if __name__ == '__main__':
                 Commands[args[0]](*args[1:])
             else:
                 if args[0] == 'debug' and p.name == 'oatman':
-                    import ipdb; ipdb.set_trace()
+                    import pudb; pudb.set_trace()
                 print("SYNTAX ERROR (type 'help' for commands)")
     except KeyboardInterrupt:
         pass
