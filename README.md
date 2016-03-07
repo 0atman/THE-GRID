@@ -2,7 +2,7 @@
 A Cyberpunk MUD!
 
 Inspiration:
- - libraryofbabel.info
+ - www.libraryofbabel.info
  - No Man's Sky
 
 THE GRID is an infinite matrix of areas, or rooms. There may be a practical limit on Python 3's integers of 9,223,372,036,854,775,807. Square that number to get the maximum number of rooms, and...
