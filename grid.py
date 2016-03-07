@@ -230,6 +230,7 @@ if __name__ == '__main__':
             if get("AUTH:%s" % name) == password:
                 print("LOGIN OK")
                 p.name = name
+                p.initialise()
                 break
             elif get("AUTH:%s" % name):
                 print("PASSWORD INCORRECT")
@@ -237,12 +238,12 @@ if __name__ == '__main__':
                 register = input("No one here with that name, register? Y/N: ")
                 if register.lower() in ['yes', 'y']:
                     put('AUTH:%s' % name, password)
-                    print("%s registered and logged in.", name)
+                    print("%s registered and logged in." % name)
                     p.name = name
-                    add_to_room(p)
+                    p.initialise(new=True)
                     break
 
-        p.initialise()
+
 
         print("(type help to get a list of commands)\n")
         print("%s enters THE GRID." % p.name)
