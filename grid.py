@@ -3,6 +3,8 @@ import requests
 from getpass import getpass
 import json
 
+from blessings import Terminal
+
 from auth import api_key
 
 
@@ -66,7 +68,11 @@ class Player(object):
         room_data = json.loads(room_raw)
         room_data['players'].remove(p.name)
         if room_data['players']:
-            print("HERE: " + ", ".join(room_data['players']))
+            prompt = "HERE: " + ", ".join(room_data['players'])
+            with t.location(t.width - len(prompt), t.height - 1):
+                print(t.bold('Hi there!'))
+                print(prompt)
+            
         if room_data.get('data'):
                 for n, datum in enumerate(room_data.get('data')):
                     print("DATA #" + str(n) + " " + datum.split('\n')[0])
@@ -210,6 +216,8 @@ def position(player):
 
 if __name__ == '__main__':
 
+    t = Terminal()
+    t.clear
     p = Player()
 
     Commands = {
@@ -244,7 +252,6 @@ if __name__ == '__main__':
                     break
 
 
-
         print("(type help to get a list of commands)\n")
         print("%s enters THE GRID." % p.name)
         p.status()
@@ -253,11 +260,11 @@ if __name__ == '__main__':
             line = input(position(p) + "> ")
             args = line.split()
 
-            if Commands.get(args[0]):
+            if args and Commands.get(args[0]):
                 Commands[args[0]](*args[1:])
             else:
-                if args[0] == 'debug' and p.name == 'oatman':
-                    import pudb; pudb.set_trace()
+                if args and args[0] == 'debug' and p.name == 'oatman':
+                    import ipdb; ipdb.set_trace()
                 print("SYNTAX ERROR (type 'help' for commands)")
     except KeyboardInterrupt:
         pass
