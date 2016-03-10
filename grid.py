@@ -68,11 +68,7 @@ class Player(object):
         room_data = json.loads(room_raw)
         room_data['players'].remove(p.name)
         if room_data['players']:
-            prompt = "HERE: " + ", ".join(room_data['players'])
-            with t.location(t.width - len(prompt), t.height - 1):
-                print(t.bold('Hi there!'))
-                print(prompt)
-            
+            print("HERE: " + ", ".join(room_data['players']))
         if room_data.get('data'):
                 for n, datum in enumerate(room_data.get('data')):
                     print("DATA #" + str(n) + " " + datum.split('\n')[0])
@@ -102,7 +98,10 @@ class Player(object):
         self.status()
 
     def writenote(self):
-        print("Write your note below, to finish put a period '.' on a line by itself")
+        print(
+            "Write your note below, "
+            "to finish put a period '.' on a line by itself"
+        )
         input_list = []
 
         while True:
@@ -145,9 +144,9 @@ class Player(object):
                         json.dumps(room_data)
                     )
                 except ValueError:
-                    raise #print("Bad note ID.")
+                    raise  # print("Bad note ID.")
                 except IndexError:
-                    raise # print("Can't find that note ID")
+                    raise  # print("Can't find that note ID")
                 return
             if len(args) == 1:
                 try:
@@ -178,7 +177,10 @@ class Player(object):
         self.__dict__ = json.loads(get('PLAYER:%s' % p.name))
 
         if self.name in get('GRID:%s,%s' % (str(p.x), str(p.y))):
-            print("Already logged in. If this is in error, please contact oatman@bgr0.com.")
+            print(
+                "Already logged in."
+                "If this is in error, please contact oatman@bgr0.com."
+            )
             raise
 
         add_to_room(self)
@@ -232,6 +234,7 @@ if __name__ == '__main__':
       'notes': p.notes,
       }
     try:
+        print(t.bold('GRID ONLINE'))
         while(True):
             name = input("What is your name chummer? ")
             password = getpass()
@@ -251,20 +254,24 @@ if __name__ == '__main__':
                     p.initialise(new=True)
                     break
 
-
         print("(type help to get a list of commands)\n")
         print("%s enters THE GRID." % p.name)
         p.status()
 
         while(p.health > 0):
-            line = input(position(p) + "> ")
+            prompt = position(p)
+            with t.location(t.width - len(prompt), t.height - 1):
+                #print(t.bold('Hi there!'))
+                print(prompt)
+            line = input("> ")
             args = line.split()
 
             if args and Commands.get(args[0]):
                 Commands[args[0]](*args[1:])
             else:
                 if args and args[0] == 'debug' and p.name == 'oatman':
-                    import ipdb; ipdb.set_trace()
+                    import ipdb
+                    ipdb.set_trace()
                 print("SYNTAX ERROR (type 'help' for commands)")
     except KeyboardInterrupt:
         pass
