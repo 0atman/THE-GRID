@@ -1,6 +1,31 @@
-def max_previous_spiral(x, y, offset=0): 
+def isprime(n):
+    """Returns True if n is prime"""
+    if n == 2:
+        return True
+    if n == 3:
+        return True
+    if n % 2 == 0:
+        return False
+    if n % 3 == 0:
+        return False
+
+    i = 5
+    w = 2
+
+    while i * i <= n:
+        if n % i == 0:
+            return False
+
+        i += w
+        w = 6 - w
+
+    return True
+
+
+def max_previous_spiral(x, y, offset=0):
     n = max([abs(x), abs(y)]) + offset
     return 4*n**2 - 4*n+1
+
 
 def get_spiral_number(x, y):
     """
@@ -8,9 +33,8 @@ def get_spiral_number(x, y):
     """
     radius = max(abs(x), abs(y))
     mps = max_previous_spiral(x, y)
-    mp2s = max_previous_spiral(x, y, -1)
 
-    if x == 0 and y==0:
+    if x == 0 and y == 0:
         return 0
 
     elif x >= 0 and y >= 0:
@@ -18,7 +42,7 @@ def get_spiral_number(x, y):
         (3, 2) = 30
         if both are +ve,
         max previous spiral,
-        add the radius 
+        add the radius
         add y
         add radius - x
         QED
@@ -36,7 +60,6 @@ def get_spiral_number(x, y):
         QED
         """
         return mps + (radius * 3) + abs(x) + (radius - abs(y))
-
 
     elif x <= 0 and y <= 0:
         """
@@ -70,3 +93,7 @@ def get_spiral_number(x, y):
             + rad - abs y
             """
             return mps + (radius * 7) + abs(x) + (radius - abs(y))
+
+
+def is_prime_grid(x, y):
+    return isprime(get_spiral_number(x, y))
