@@ -3,3 +3,4 @@ ipdb
 blessings
 prompt-toolkit
 pygments
+fn
