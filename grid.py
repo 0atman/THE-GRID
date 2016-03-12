@@ -219,7 +219,6 @@ def position(player):
 if __name__ == '__main__':
 
     t = Terminal()
-    t.clear
     p = Player()
 
     Commands = {
@@ -254,15 +253,15 @@ if __name__ == '__main__':
                     p.initialise(new=True)
                     break
 
+        print(t.clear())
         print("(type help to get a list of commands)\n")
         print("%s enters THE GRID." % p.name)
         p.status()
 
         while(p.health > 0):
             prompt = position(p)
-            with t.location(t.width - len(prompt), t.height - 1):
-                #print(t.bold('Hi there!'))
-                print(prompt)
+            with t.location(t.width - len(prompt), 0):
+                print(t.bold(prompt))
             line = input("> ")
             args = line.split()
 
