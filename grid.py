@@ -332,37 +332,21 @@ def position(player):
     return "GRID(%d,%d)" % (p.x, p.y)
 
 
-@manager.registry.add_binding(Keys.ControlQ)
+@manager.registry.add_binding(Keys.Down)
 def _(event):
-    def print_hello():
-        import ipdb
-        igpdb.set_trace()
-    event.cli.run_in_terminal(print_hello)
+    event.cli.run_in_terminal(p.south)
 
-
-@manager.registry.add_binding(Keys.ControlJ)
+@manager.registry.add_binding(Keys.Up)
 def _(event):
-    def print_hello():
-        p.south()
-    event.cli.run_in_terminal(print_hello)
+    event.cli.run_in_terminal(p.north)
 
-@manager.registry.add_binding(Keys.ControlK)
+@manager.registry.add_binding(Keys.Left)
 def _(event):
-    def print_hello():
-        p.north()
-    event.cli.run_in_terminal(print_hello)
+    event.cli.run_in_terminal(p.west)
 
-@manager.registry.add_binding(Keys.ControlH)
+@manager.registry.add_binding(Keys.Right)
 def _(event):
-    def print_hello():
-        p.west()
-    event.cli.run_in_terminal(print_hello)
-
-@manager.registry.add_binding(Keys.ControlL)
-def _(event):
-    def print_hello():
-        p.east()
-    event.cli.run_in_terminal(print_hello)
+    event.cli.run_in_terminal(p.east)
 
 
 if __name__ == '__main__':
