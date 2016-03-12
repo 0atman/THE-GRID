@@ -1,3 +1,5 @@
 requests
 ipdb
 blessings
+prompt-toolkit
+pygments

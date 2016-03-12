@@ -3,12 +3,126 @@ import requests
 from getpass import getpass
 import json
 
-from blessings import Terminal
+from prompt_toolkit import prompt
+from prompt_toolkit.styles import style_from_dict
+from prompt_toolkit.token import Token
+from pygments.lexers import HaskellLexer
+
+from prompt_toolkit.layout.lexers import PygmentsLexer
+from prompt_toolkit.contrib.completers import WordCompleter
+from prompt_toolkit.history import InMemoryHistory
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.key_binding.manager import KeyBindingManager
+from prompt_toolkit.keys import Keys
+
 
 from auth import api_key
 
 
 base_url = 'http://stord.io/key/'
+
+
+style = style_from_dict({
+    Token.Toolbar: '#ffffff bg:#333333',
+})
+history = InMemoryHistory()
+manager = KeyBindingManager.for_prompt()
+
+def isprime(n):
+    """Returns True if n is prime"""
+    if n == 2:
+        return True
+    if n == 3:
+        return True
+    if n % 2 == 0:
+        return False
+    if n % 3 == 0:
+        return False
+
+    i = 5
+    w = 2
+
+    while i * i <= n:
+        if n % i == 0:
+            return False
+
+        i += w
+        w = 6 - w
+
+    return True
+
+def max_previous_spiral(x, y, offset=0): 
+    n = max([abs(x), abs(y)]) + offset
+    return 4*n**2 - 4*n+1
+
+def get_spiral_number(x, y):
+    """
+    radius is zero indexed
+    """
+    radius = max(abs(x), abs(y))
+    mps = max_previous_spiral(x, y)
+    mp2s = max_previous_spiral(x, y, -1)
+
+    if x == 0 and y==0:
+        return 0
+
+    elif x >= 0 and y >= 0:
+        """
+        (3, 2) = 30
+        if both are +ve,
+        max previous spiral,
+        add the radius 
+        add y
+        add radius - x
+        QED
+        """
+        return mps + radius + y + (radius - x)
+
+    elif x <= 0 and y >= 0:
+        """
+        (-2, 3) = 36
+        if x is -ve
+        max previous spiral,
+        add radius x 3
+        add abs x
+        + rad - y
+        QED
+        """
+        return mps + (radius * 3) + abs(x) + (radius - abs(y))
+
+
+    elif x <= 0 and y <= 0:
+        """
+        (-2, -3) = 44
+        if x is -ve
+        max previous spiral,
+        add radius x 5
+        add abs y
+        + rad - abs x
+        """
+        return mps + (radius * 5) + abs(y) + (radius - abs(x))
+
+    elif x >= 0 and y <= 0:
+        if abs(x) > abs(y):
+            """
+            (3, -2) = 26
+            (4, -2) = 51
+            if x > abs y:
+            max previous spirals
+            + rad - abs x
+            + rad - abs y
+            """
+            return mps + radius - abs(x) + radius - abs(y)
+        else:
+            """
+            (2, -3) = 48
+            if x <= abs y
+            max previous spirals
+            + r * 7
+            + abs x
+            + rad - abs y
+            """
+            return mps + (radius * 7) + abs(x) + (radius - abs(y))
 
 
 def get(key):
@@ -67,6 +181,7 @@ class Player(object):
         )
         room_data = json.loads(room_raw)
         room_data['players'].remove(p.name)
+
         if room_data['players']:
             print("HERE: " + ", ".join(room_data['players']))
         if room_data.get('data'):
@@ -216,9 +331,42 @@ def position(player):
     room_data['players'].remove(p.name)
     return "GRID(%d,%d)" % (p.x, p.y)
 
+
+@manager.registry.add_binding(Keys.ControlQ)
+def _(event):
+    def print_hello():
+        import ipdb
+        igpdb.set_trace()
+    event.cli.run_in_terminal(print_hello)
+
+
+@manager.registry.add_binding(Keys.ControlJ)
+def _(event):
+    def print_hello():
+        p.south()
+    event.cli.run_in_terminal(print_hello)
+
+@manager.registry.add_binding(Keys.ControlK)
+def _(event):
+    def print_hello():
+        p.north()
+    event.cli.run_in_terminal(print_hello)
+
+@manager.registry.add_binding(Keys.ControlH)
+def _(event):
+    def print_hello():
+        p.west()
+    event.cli.run_in_terminal(print_hello)
+
+@manager.registry.add_binding(Keys.ControlL)
+def _(event):
+    def print_hello():
+        p.east()
+    event.cli.run_in_terminal(print_hello)
+
+
 if __name__ == '__main__':
 
-    t = Terminal()
     p = Player()
 
     Commands = {
@@ -233,7 +381,7 @@ if __name__ == '__main__':
       'notes': p.notes,
       }
     try:
-        print(t.bold('GRID ONLINE'))
+        print('GRID ONLINE')
         while(True):
             name = input("What is your name chummer? ")
             password = getpass()
@@ -253,24 +401,34 @@ if __name__ == '__main__':
                     p.initialise(new=True)
                     break
 
-        print(t.clear())
         print("(type help to get a list of commands)\n")
         print("%s enters THE GRID." % p.name)
         p.status()
 
+        def get_bottom_toolbar_tokens(cli):
+            spn = get_spiral_number(p.x, p.y)
+            prime = isprime(spn)
+            prompt_text = position(p) + ":" + str(spn) + ":" + ("RANDOM ENCOUNTER" if prime else "")
+            return [(Token.Toolbar, ' %s ' % prompt_text)]
+
         while(p.health > 0):
-            prompt = position(p)
-            with t.location(t.width - len(prompt), 0):
-                print(t.bold(prompt))
-            line = input("> ")
+            
+
+            line = prompt(
+                '> ',
+                get_bottom_toolbar_tokens=get_bottom_toolbar_tokens,
+                style=style,
+                lexer=PygmentsLexer(HaskellLexer),
+                completer=WordCompleter(Commands.keys()),
+                history=history,
+                auto_suggest=AutoSuggestFromHistory(),
+                key_bindings_registry=manager.registry
+            )
             args = line.split()
 
             if args and Commands.get(args[0]):
                 Commands[args[0]](*args[1:])
             else:
-                if args and args[0] == 'debug' and p.name == 'oatman':
-                    import ipdb
-                    ipdb.set_trace()
                 print("SYNTAX ERROR (type 'help' for commands)")
     except KeyboardInterrupt:
         pass
