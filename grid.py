@@ -3,22 +3,24 @@ import requests
 from getpass import getpass
 import json
 
+from pygments.lexers import HaskellLexer
+from fn.func import curried
 from prompt_toolkit import prompt
 from prompt_toolkit.styles import style_from_dict
 from prompt_toolkit.token import Token
-from pygments.lexers import HaskellLexer
-
 from prompt_toolkit.layout.lexers import PygmentsLexer
 from prompt_toolkit.contrib.completers import WordCompleter
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.key_binding.manager import KeyBindingManager
 from prompt_toolkit.keys import Keys
+from prompt_toolkit.shortcuts import print_tokens
 
 
 from auth import api_key
 from spiral import is_prime_grid, get_spiral_number
 from player import Player
+from world import look, get_room
 
 
 base_url = 'http://stord.io/key/'
@@ -26,6 +28,10 @@ base_url = 'http://stord.io/key/'
 
 style = style_from_dict({
     Token.Toolbar: '#ffffff bg:#333333',
+    Token.Red: '#ff0066',
+    Token.Green: '#44ff44',
+    Token.Orange: '#ff9900',
+    Token.White: '#ffffff',
 })
 history = InMemoryHistory()
 manager = KeyBindingManager.for_prompt()
@@ -45,21 +51,14 @@ def put(key, value):
     ).json()
 
 
-def help(*args):
+def help(room, player, *args):
     if args:
         print(Commands.get(args[0]).__doc__)
     else:
         print("Commands:", ", ".join(Commands.keys()))
 
 
-def get_room(x, y):
-    room_raw = get(
-        'GRID:%s,%s' % (str(x), str(y))
-    )
-    return json.loads(room_raw) if room_raw else {'players': []}
-
-
-def scan():
+def scan(*args):
     for y in reversed(range(0, 10)):
         print([
             len(get_room(x, y)['players'])
@@ -73,7 +72,7 @@ def position(player):
     )
     room_data = json.loads(room_raw)
     room_data['players'].remove(p.name)
-    return "GRID(%d,%d)" % (p.x, p.y)
+    return "NODE(%0.2X,%0.2X)" % (p.x, p.y)
 
 
 @manager.registry.add_binding(Keys.Down)
@@ -103,11 +102,8 @@ if __name__ == '__main__':
     Commands = {
       'quit': p.quit,
       'help': help,
+      'look': look,
       'status': p.status,
-      'north': p.north,
-      'south': p.south,
-      'east': p.east,
-      'west': p.west,
       'scan': scan,
       'notes': p.notes,
       }
@@ -136,19 +132,32 @@ if __name__ == '__main__':
         print("%s enters THE GRID." % p.name)
         p.status()
 
-        def get_bottom_toolbar_tokens(cli):
-            pow_value = get_spiral_number(p.x, p.y)
+        @curried
+        def get_bottom_toolbar_tokens(player, cli):
+            pow_value = get_spiral_number(player.x, player.y)
             prime = is_prime_grid(p.x, p.y)
-            prompt_text = position(p) + (
-                ": PROXIMITY WARNING" if prime else ""
-            )
-            return [(Token.Toolbar, ' %s ' % prompt_text)]
+            prompt_text = position(p)
+            tokens = [
+                (Token.Toolbar, ' '),
+                (Token.Green, ' GRID ONLINE '),
+                (Token.Toolbar, ' '),
+                (Token.White, ' %s ' % prompt_text),
+                (Token.Toolbar, ' '),
+                (Token.Orange, ' %d POW ' % player.pow),
+            ]
+            if prime:
+                tokens.append((Token.Toolbar, ' '))
+                tokens.append((Token.Red, " PROXIMITY WARNING "))
+            return tokens
+
+
+        toolbar_tokens = get_bottom_toolbar_tokens(p)
 
         while(p.health > 0):
 
             line = prompt(
                 '> ',
-                get_bottom_toolbar_tokens=get_bottom_toolbar_tokens,
+                get_bottom_toolbar_tokens=toolbar_tokens,
                 style=style,
                 lexer=PygmentsLexer(HaskellLexer),
                 completer=WordCompleter(Commands.keys()),
@@ -159,7 +168,8 @@ if __name__ == '__main__':
             args = line.split()
 
             if args and Commands.get(args[0]):
-                Commands[args[0]](*args[1:])
+
+                Commands[args[0]](get_room(p.x, p.y), p, *args[1:])
             else:
                 print("SYNTAX ERROR (type 'help' for commands)")
     except KeyboardInterrupt:

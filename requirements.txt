@@ -4,3 +4,4 @@ blessings
 prompt-toolkit
 pygments
 fn
+webcolors
