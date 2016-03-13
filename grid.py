@@ -177,8 +177,7 @@ if __name__ == '__main__':
     except EOFError:
         pass
     except Exception as e:
-        import socket
-        if not socket.gethostname() == 'bgr0.com':
+        if p.name == 'oatman':
             raise e
     finally:
         p.quit()

@@ -136,7 +136,7 @@ class Player(object):
 
         if self.name in get('GRID:%s,%s' % (str(self.x), str(self.y))):
             print(
-                "Already logged in."
+                "Already logged in. Try again."
                 "If this is in error, please contact oatman@bgr0.com."
             )
             raise
