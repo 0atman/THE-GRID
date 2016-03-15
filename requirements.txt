@@ -5,3 +5,5 @@ prompt-toolkit
 pygments
 fn
 webcolors
+ply==3.8
+ptpython
