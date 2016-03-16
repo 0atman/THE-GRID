@@ -21,6 +21,7 @@ from auth import api_key
 from spiral import is_prime_grid, get_spiral_number
 from player import Player
 from world import look, get_room
+import lis
 
 
 base_url = 'http://stord.io/key/'
@@ -106,6 +107,7 @@ if __name__ == '__main__':
       'status': p.status,
       'scan': scan,
       'notes': p.notes,
+      'repl': lis.repl
       }
     try:
         print('GRID ONLINE')
@@ -150,7 +152,6 @@ if __name__ == '__main__':
                 tokens.append((Token.Red, " PROXIMITY WARNING "))
             return tokens
 
-
         toolbar_tokens = get_bottom_toolbar_tokens(p)
 
         while(p.health > 0):
@@ -169,7 +170,11 @@ if __name__ == '__main__':
 
             if args and Commands.get(args[0]):
 
-                Commands[args[0]](get_room(p.x, p.y), p, *args[1:])
+                Commands[args[0]](
+                    get_room(p.x, p.y),
+                    p,
+                    *args[1:]
+                )
             else:
                 print("SYNTAX ERROR (type 'help' for commands)")
     except KeyboardInterrupt:

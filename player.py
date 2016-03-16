@@ -2,6 +2,7 @@ import json
 
 from world import remove_from_room, add_to_room, get_room, put_room
 from stord import get, put
+import lis
 
 
 def get_player(player):
@@ -76,8 +77,18 @@ class Player(object):
         self.note_store.append("\n".join(input_list))
         self.save()
 
-    def notes(self, *args):
-        if args:
+    def notes(self, world, player, *args):
+        if not self.__dict__.get('note_store'):
+            self.note_store = []
+            self.save()
+        if len(args) == 0:
+            if self.note_store:
+                for n, note in enumerate(self.note_store):
+                    print("note #" + str(n) + "\n" + note.split('\n')[0])
+            else:
+                print("No notes.")
+
+        elif len(args) > 0:
             if args[0].lower() in ['new', 'create', 'write', 'add']:
                 self.writenote()
                 return
@@ -85,8 +96,19 @@ class Player(object):
                 try:
                     del self.note_store[int(args[1])]
                     self.save()
+                    print('Deleted.')
                 except ValueError:
                     print("Bad note ID.")
+                except IndexError:
+                    print("Can't find that note ID")
+                return
+            if args[0].lower() in ['run']:
+                try:
+                    for line in self.note_store[int(args[1])].split('\n'):
+                        val = lis.eval(lis.parse(line))
+                        if val:
+                            print(lis.lispstr(val))
+                    print()
                 except IndexError:
                     print("Can't find that note ID")
                 return
@@ -106,7 +128,7 @@ class Player(object):
                 except IndexError:
                     raise  # print("Can't find that note ID")
                 return
-            if len(args) == 1:
+            elif args[0].isdigit():
                 try:
                     print(
                         "note #" +
@@ -120,11 +142,6 @@ class Player(object):
                 except IndexError:
                     print("Can't find that note ID")
                     return
-        if not self.__dict__.get('note_store'):
-            self.note_store = []
-            self.save()
-        for n, note in enumerate(self.note_store):
-            print("note #" + str(n) + " " + note.split('\n')[0])
 
     def save(self):
         put('PLAYER:%s' % self.name, json.dumps(self.__dict__))
