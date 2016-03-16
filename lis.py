@@ -6,6 +6,7 @@ Lispy: Scheme Interpreter in Python
 
 from prompt_toolkit import prompt as prompt_tk
 
+
 Symbol = str          # A Lisp Symbol is implemented as a Python str
 List = list         # A Lisp List is implemented as a Python list
 Number = (int, float)  # A Lisp Number is implemented as a Python int or float
@@ -102,7 +103,7 @@ global_env = standard_env()
 # ############### Interaction: A REPL
 
 
-def repl(world={}, player={}, prompt='scheme> '):
+def repl(world={}, player={}, prompt='scheme> ', environment=global_env, prompt_func=prompt_tk):
     """
     Built-in lisp (scheme) Interpreter.
     This functionality is crazy beta, it will eat your dog.
@@ -116,7 +117,7 @@ def repl(world={}, player={}, prompt='scheme> '):
     print("Exit with ctrl+d. Use THE GRID's help system for help.")
     while True:
         try:
-            val = eval(parse(prompt_tk(prompt)))
+            val = eval(parse(prompt_func(prompt)), environment)
             if val is not None:
                 print(lispstr(val))
         except KeyboardInterrupt:

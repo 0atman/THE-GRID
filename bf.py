@@ -34,7 +34,7 @@ def main(args):
     brackets = args[1]
     counter = tapeCounter = 0
     tape = [0]*30000
-    output = []
+
     while counter < len(parsedInput):
         char = parsedInput[counter]
         if char == ">":

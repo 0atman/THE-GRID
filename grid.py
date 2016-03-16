@@ -14,7 +14,6 @@ from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.key_binding.manager import KeyBindingManager
 from prompt_toolkit.keys import Keys
-from prompt_toolkit.shortcuts import print_tokens
 
 
 from auth import api_key
@@ -96,9 +95,26 @@ def right(event):
     event.cli.run_in_terminal(p.east)
 
 
+def grid_prompt(text='> '):
+    return prompt(
+        text,
+        get_bottom_toolbar_tokens=toolbar_tokens,
+        style=style,
+        lexer=PygmentsLexer(HaskellLexer),
+        completer=WordCompleter(Commands.keys()),
+        history=history,
+        auto_suggest=AutoSuggestFromHistory(),
+        key_bindings_registry=manager.registry
+    )
+
+
 if __name__ == '__main__':
 
     p = Player()
+    environ = lis.standard_env()
+    environ.update({
+        'pup': lambda x: bool([p.north() for i in range(x)]),
+    })
 
     Commands = {
       'quit': p.quit,
@@ -107,7 +123,7 @@ if __name__ == '__main__':
       'status': p.status,
       'scan': scan,
       'notes': p.notes,
-      'repl': lis.repl
+      'repl': lambda *args: lis.repl(environment=environ, prompt_func=grid_prompt)
       }
     try:
         print('GRID ONLINE')
@@ -156,16 +172,7 @@ if __name__ == '__main__':
 
         while(p.health > 0):
 
-            line = prompt(
-                '> ',
-                get_bottom_toolbar_tokens=toolbar_tokens,
-                style=style,
-                lexer=PygmentsLexer(HaskellLexer),
-                completer=WordCompleter(Commands.keys()),
-                history=history,
-                auto_suggest=AutoSuggestFromHistory(),
-                key_bindings_registry=manager.registry
-            )
+            line = grid_prompt()
             args = line.split()
 
             if args and Commands.get(args[0]):
