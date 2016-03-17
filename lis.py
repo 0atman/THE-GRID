@@ -4,6 +4,8 @@ Lispy: Scheme Interpreter in Python
 (c) Peter Norvig, 2010-14; See http://norvig.com/lispy.html
 '''
 
+from functools import reduce
+
 from prompt_toolkit import prompt as prompt_tk
 
 
@@ -61,8 +63,15 @@ def standard_env():
     env = Env()
     env.update(vars(math))  # sin, cos, sqrt, pi, ...
     env.update({
-        '+': op.add, '-': op.sub, '*': op.mul, '/': lambda x, y: x / y,
-        '>': op.gt, '<': op.lt, '>=': op.ge, '<=': op.le, '=': op.eq,
+        '+': lambda *args: reduce(op.add, args),
+        '-': lambda *args: reduce(op.sub, args),
+        '*': lambda *args: reduce(op.mul, args),
+        '/': lambda *args: reduce(lambda x, y: x / y, args),
+        '>': op.gt,
+        '<': op.lt,
+        '>=': op.ge,
+        '<=': op.le,
+        '=': op.eq,
         'abs': abs,
         'append': op.add,
         'apply': lambda f, a: f(*a),
@@ -175,3 +184,6 @@ def eval(x, env=global_env):
         proc = eval(x[0], env)
         args = [eval(exp, env) for exp in x[1:]]
         return proc(*args)
+
+if __name__=='__main__':
+    repl()
