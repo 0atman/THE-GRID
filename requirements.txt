@@ -7,3 +7,4 @@ fn
 webcolors
 ply==3.8
 ptpython
+mypy-lang==0.3.1

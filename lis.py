@@ -53,10 +53,8 @@ def atom(token):
         except ValueError:
             return Symbol(token)
 
-# ############### Environments
 
-
-def standard_env():
+def standard_env(player={}, world={}):
     "An environment with some Scheme standard procedures."
     import math
     import operator as op
@@ -105,14 +103,19 @@ class Env(dict):
 
     def find(self, var):
         "Find the innermost Env where var appears."
-        return self if (var in self) else self.outer.find(var)
+        if var in self:
+            return self
+        elif self.outer:
+            return self.outer.find(var)
+        else:
+            return {}
 
 global_env = standard_env()
 
 # ############### Interaction: A REPL
 
 
-def repl(world={}, player={}, prompt='scheme> ', environment=global_env, prompt_func=prompt_tk):
+def repl(environment=global_env, prompt_func=prompt_tk):
     """
     Built-in lisp (scheme) Interpreter.
     This functionality is crazy beta, it will eat your dog.
@@ -126,7 +129,10 @@ def repl(world={}, player={}, prompt='scheme> ', environment=global_env, prompt_
     print("Exit with ctrl+d. Use THE GRID's help system for help.")
     while True:
         try:
-            val = eval(parse(prompt_func(prompt)), environment)
+            ast = parse(prompt_func('> '))
+
+            val = eval(ast, environment)
+
             if val is not None:
                 print(lispstr(val))
         except KeyboardInterrupt:
@@ -134,6 +140,9 @@ def repl(world={}, player={}, prompt='scheme> ', environment=global_env, prompt_
         except EOFError:
             break
         except Exception as e:
+            print('SYNTAX ERROR')
+            import traceback
+            traceback.print_tb(e.__traceback__)
             print(e)
 
 
@@ -160,8 +169,10 @@ class Procedure(object):
 
 def eval(x, env=global_env):
     "Evaluate an expression in an environment."
+    if '"' in x:
+        return x[1:-1]
     if isinstance(x, Symbol):      # variable reference
-        return env.find(x)[x]
+        return env.find(x).get(x)
     elif not isinstance(x, List):  # constant literal
         return x
     elif x[0] == 'quote':          # (quote exp)
@@ -185,5 +196,5 @@ def eval(x, env=global_env):
         args = [eval(exp, env) for exp in x[1:]]
         return proc(*args)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     repl()
