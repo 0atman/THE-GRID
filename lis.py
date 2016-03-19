@@ -18,11 +18,17 @@ Number = (int, float)  # A Lisp Number is implemented as a Python int or float
 
 def parse(program):
     "Read a Scheme expression from a string."
-    return read_from_tokens(tokenize(program))
+    expression = read_from_tokens(tokenize(program))
+
+    if type(expression) == str:
+        return [expression]
+    return expression
 
 
 def tokenize(s):
     "Convert a string into a list of tokens."
+    if s.count('"') == 2 and s[0] == '"' and s[-1] == '"':
+        return [s[1:-1]]
     return s.replace('(', ' ( ').replace(')', ' ) ').split()
 
 
@@ -91,6 +97,7 @@ def standard_env(player={}, world={}):
         'procedure?': callable,
         'round':   round,
         'symbol?': lambda x: isinstance(x, Symbol),
+        'string': str,
     })
     return env
 
@@ -113,6 +120,7 @@ class Env(dict):
 global_env = standard_env()
 
 # ############### Interaction: A REPL
+
 
 
 def repl(environment=global_env, prompt_func=prompt_tk):
@@ -164,37 +172,51 @@ class Procedure(object):
     def __call__(self, *args):
         return eval(self.body, Env(self.parms, args, self.env))
 
-# ############### eval
 
 
 def eval(x, env=global_env):
     "Evaluate an expression in an environment."
-    if '"' in x:
+    if type(x) == str and '"' in x:
         return x[1:-1]
+
     if isinstance(x, Symbol):      # variable reference
         return env.find(x).get(x)
+
     elif not isinstance(x, List):  # constant literal
         return x
+
     elif x[0] == 'quote':          # (quote exp)
         (_, exp) = x
         return exp
+
     elif x[0] == 'if':             # (if test conseq alt)
         (_, test, conseq, alt) = x
         exp = (conseq if eval(test, env) else alt)
         return eval(exp, env)
+
     elif x[0] == 'define':         # (define var exp)
         (_, var, exp) = x
         env[var] = eval(exp, env)
+
     elif x[0] == 'set!':           # (set! var exp)
         (_, var, exp) = x
         env.find(var)[var] = eval(exp, env)
+
     elif x[0] == 'lambda':         # (lambda (var...) body)
         (_, parms, body) = x
         return Procedure(parms, body, env)
+ 
     else:                          # (proc arg...)
         proc = eval(x[0], env)
         args = [eval(exp, env) for exp in x[1:]]
         return proc(*args)
 
-if __name__ == '__main__':
-    repl()
+
+def eval_string(line):
+    ast = parse(line)
+
+    val = eval(ast)
+
+    if val is not None:
+        return lispstr(val)
+

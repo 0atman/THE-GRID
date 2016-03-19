@@ -2,7 +2,7 @@ import typing
 from ui import ReprTriggeredFunction
 
 
-def help_function(topic: str = '') -> str:
+def help_function(topic: str = '',) -> str:
     #import ipdb; ipdb.set_trace()
 
     tutorial = '''
