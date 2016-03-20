@@ -134,7 +134,6 @@ def repl(environment=global_env, prompt_func=prompt_tk):
 
     Have fun!
     """
-    print("Exit with ctrl+d. Use THE GRID's help system for help.")
     while True:
         try:
             ast = parse(prompt_func('> '))

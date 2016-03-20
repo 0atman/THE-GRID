@@ -1,18 +1,15 @@
 import typing
+import os
 from ui import ReprTriggeredFunction
 
 
-def help_function(topic: str = '',) -> str:
-    #import ipdb; ipdb.set_trace()
+def help_function(topic: str = 'help') -> str:
 
-    tutorial = '''
-        Welcome chummer.
-        It's so nice of you to drop by.
-    '''
-    if topic and locals().get(topic):
-        return locals()[topic]
-    else:
-        return "This is the lovely help system."
+    try:
+        with open(os.path.join('help', topic) + ".txt") as tfile:
+            return tfile.read()
+    except:
+        return "Topic not found. To get started just type 'help'."
 
 
 help_system = ReprTriggeredFunction(help_function)

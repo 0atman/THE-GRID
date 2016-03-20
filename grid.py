@@ -131,9 +131,15 @@ if __name__ == '__main__':
         environ = lis.standard_env(player=p, world=world)
         environ.update({
             'pup': lambda x: bool([p.north() for i in range(x)]),
-            'man': help,
-            'help': help_system
+            'help': help_system,
+            'quit': p.quit,
+            'help': help,
+            # 'look': look,
+            'status': p.status,
+            'scan': scan,
+            'notes': lambda *args: p.notes({} *argh)
         })
+        import ipdb; ipdb.set_trace()
         lis.repl(environment=environ, prompt_func=grid_prompt)
     except KeyboardInterrupt:
         pass

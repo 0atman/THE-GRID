@@ -77,7 +77,7 @@ class Player(object):
         self.note_store.append("\n".join(input_list))
         self.save()
 
-    def notes(self, world, player, *args):
+    def notes(self, world, *args):
         if not self.__dict__.get('note_store'):
             self.note_store = []
             self.save()
