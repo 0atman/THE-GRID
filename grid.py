@@ -137,9 +137,8 @@ if __name__ == '__main__':
             # 'look': look,
             'status': p.status,
             'scan': scan,
-            'notes': lambda *args: p.notes({} *argh)
+            'notes': lambda *args: p.notes({}, *args)
         })
-        import ipdb; ipdb.set_trace()
         lis.repl(environment=environ, prompt_func=grid_prompt)
     except KeyboardInterrupt:
         pass

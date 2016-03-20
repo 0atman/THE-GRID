@@ -89,10 +89,10 @@ class Player(object):
                 print("No notes.")
 
         elif len(args) > 0:
-            if args[0].lower() in ['new', 'create', 'write', 'add']:
+            if str(args[0]).lower() in ['new', 'create', 'write', 'add']:
                 self.writenote()
                 return
-            if args[0].lower() in ['delete', 'del', 'rm']:
+            if str(args[0]).lower() in ['delete', 'del', 'rm']:
                 try:
                     del self.note_store[int(args[1])]
                     self.save()
@@ -102,7 +102,7 @@ class Player(object):
                 except IndexError:
                     print("Can't find that note ID")
                 return
-            if args[0].lower() in ['run']:
+            if str(args[0]).lower() in ['run']:
                 try:
                     for line in self.note_store[int(args[1])].split('\n'):
                         val = lis.eval(lis.parse(line))
@@ -112,7 +112,7 @@ class Player(object):
                 except IndexError:
                     print("Can't find that note ID")
                 return
-            if args[0].lower() in ['drop']:
+            if str(args[0]).lower() in ['drop']:
                 try:
                     dropped_note = self.note_store[int(args[1])]
                     del self.note_store[int(args[1])]
@@ -128,7 +128,7 @@ class Player(object):
                 except IndexError:
                     raise  # print("Can't find that note ID")
                 return
-            elif args[0].isdigit():
+            elif type(args[0]) == int:
                 try:
                     print(
                         "note #" +
