@@ -6,7 +6,7 @@ from fn.func import curried
 from auth import api_key
 
 
-base_url = 'http://stord.io/key/'
+base_url = 'https://stord.io/key/'
 
 
 @curried
