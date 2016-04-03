@@ -130,10 +130,11 @@ if __name__ == '__main__':
         toolbar_tokens = get_bottom_toolbar_tokens(p)
         environ = lis.standard_env(player=p, world=world)
         environ.update({
-            'pup': lambda x: bool([p.north() for i in range(x)]),
+            'up': p.up,
             'help': help_system,
             'quit': p.quit,
             # 'look': look,
+            'traverse': p.traverse,
             'status': p.status,
             'scan': scan,
             'notes': lambda *args: p.notes({}, *args)

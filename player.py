@@ -37,29 +37,36 @@ class Player(object):
                 for n, datum in enumerate(room_data.get('data')):
                     print("DATA #" + str(n) + " " + datum.split('\n')[0])
 
-    def north(self, *args):
+    def up(self, *args):
         remove_from_room(self)
         self.y = self.y + 1
         add_to_room(self)
         self.status()
 
-    def south(self, *args):
+    def down(self, *args):
         remove_from_room(self)
         self.y = self.y - 1
         add_to_room(self)
         self.status()
 
-    def east(self, *args):
+    def right(self, *args):
         remove_from_room(self)
         self.x = self.x + 1
         add_to_room(self)
         self.status()
 
-    def west(self, *args):
+    def left(self, *args):
         remove_from_room(self)
         self.x = self.x - 1
         add_to_room(self)
         self.status()
+
+    def traverse(self, x, y):
+        remove_from_room(self)
+        self.x = self.x + x
+        self.y = self.y + y
+        add_to_room(self) 
+        return (self.x, self.y)
 
     def writenote(self):
         print(
