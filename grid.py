@@ -131,6 +131,10 @@ if __name__ == '__main__':
         environ = lis.standard_env(player=p, world=world)
         environ.update({
             'up': p.up,
+            'down': p.down,
+            'left': p.left,
+            'right': p.right,
+
             'help': help_system,
             'quit': p.quit,
             # 'look': look,

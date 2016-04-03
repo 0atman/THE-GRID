@@ -159,10 +159,9 @@ class Player(object):
         self.__dict__ = get_player(self.name)
 
         if self.name in get('GRID:%s,%s' % (str(self.x), str(self.y))):
-            print(
-                "Already logged in. Try again."
+            raise Exception(
+                "Already logged in. Try again. "
                 "If this is in error, please contact oatman@bgr0.com."
             )
-            raise
 
         add_to_room(self)
