@@ -133,7 +133,6 @@ if __name__ == '__main__':
             'pup': lambda x: bool([p.north() for i in range(x)]),
             'help': help_system,
             'quit': p.quit,
-            'help': help,
             # 'look': look,
             'status': p.status,
             'scan': scan,

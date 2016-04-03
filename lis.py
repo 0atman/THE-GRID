@@ -147,10 +147,7 @@ def repl(environment=global_env, prompt_func=prompt_tk):
         except EOFError:
             break
         except Exception as e:
-            print('SYNTAX ERROR')
-            import traceback
-            traceback.print_tb(e.__traceback__)
-            print(e)
+            print('SYNTAX ERROR:', e)
 
 
 def lispstr(exp):
