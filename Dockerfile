@@ -1,7 +1,19 @@
-FROM python:3
+FROM python:3-alpine
 ENV PYTHONUNBUFFERED 1
 RUN mkdir /code
 WORKDIR /code
-ADD requirements.txt /code/
-RUN pip install -r requirements.txt
+
+RUN pip install requests
+RUN pip install ipdb
+RUN pip install blessings
+RUN pip install prompt-toolkit
+RUN pip install pygments
+RUN pip install fn
+RUN pip install webcolors
+RUN pip install ply==3.8
+RUN pip install ptpython
+RUN pip install mypy-lang==0.3.1
+RUN pip install flask-restful
+
 ADD . /code/
+CMD python web.py

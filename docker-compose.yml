@@ -1,5 +1,6 @@
 grid:
   build: .
-  command: python app.py
   volumes:
     - .:/code
+  ports:
+      - 80:5000
