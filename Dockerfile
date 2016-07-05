@@ -14,6 +14,7 @@ RUN pip install ply==3.8
 RUN pip install ptpython
 RUN pip install mypy-lang==0.3.1
 RUN pip install flask-restful
+RUN pip install Click
+RUN pip install tortilla
 
 ADD . /code/
-CMD python web.py

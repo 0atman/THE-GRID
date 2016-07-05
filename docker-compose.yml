@@ -1,6 +1,17 @@
-grid:
+web:
   build: .
   volumes:
     - .:/code
   ports:
-      - 80:5000
+      - 80:80
+  expose:
+      - 80
+  command: python web.py
+
+cli:
+  build: .
+  volumes:
+    - .:/code
+  command: python cli.py
+  links:
+    - web
