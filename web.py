@@ -12,42 +12,24 @@ import webcolors
 
 from auth import api_key
 from spiral import get_spiral_number
+from player import Player
+from stord import get, put
 
 app = Flask(__name__)
 api = Api(app)
-
-base_url = 'http://stord.io/key/'
 
 
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-       token = request.args.get('token', None)
-       if token and get('TOKEN_LOOKUP:%s' % token):
-           return f(*args, **kwargs)
-       else:
+        token = request.args.get('token', None)
+        player_name = get('TOKEN_LOOKUP:%s' % token)
+        player = Player(player_name)
+        if token and player_name:
+            return f(args[0], player, *args[1:], **kwargs)
+        else:
             abort(403)
     return decorated_function
-
-
-def get(key):
-    """
-    Get from stord.
-    """
-    return requests.get(
-        base_url + key,
-        {'auth': api_key}
-    ).json().get(key)
-
-
-def put(key, value):
-    """
-    Put to stord.
-    """
-    return requests.put(
-        base_url + key,
-        {'auth': api_key, 'value': value}
-    ).json()
 
 
 class Token(Resource):
@@ -79,6 +61,7 @@ class Token(Resource):
 
 
 class World(Resource):
+
     def closest_colour(self, requested_colour):
         min_colours = {}
         for key, name in webcolors.css3_hex_to_names.items():
@@ -97,10 +80,8 @@ class World(Resource):
             actual_name = None
         return actual_name, closest_name
 
-
-
     @login_required
-    def get(self):
+    def get(self, player):
         x = 3
         y = 3
         number = get_spiral_number(int(x), int(y))
@@ -116,13 +97,26 @@ class World(Resource):
         room_raw = get(gid)
         room = json.loads(room_raw) if room_raw else {'players': []}
         put(gid, json.dumps(room))
+        player.quit()
         return {
             "color": colour_name,
-            **room
+            "player": player.__dict__,
+            "room": room
         }
 
+class WorldPosition(Resource):
+    position_parser= reqparse.RequestParser()
+    position_parser.add_argument('move', dest='movement direction', type=str)
+
+    @login_required
+    def put(self, player):
+        args = parser.parse_args()
+        direction = args['direction']
+        return direction
 
 api.add_resource(Token, '/token/')
 api.add_resource(World, '/world/')
+api.add_resource(WorldPosition, '/world/position/')
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
