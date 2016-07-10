@@ -23,9 +23,9 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         token = request.args.get('token', None)
-        player_name = get('TOKEN_LOOKUP:%s' % token)
-        player = Player(player_name)
         if token and player_name:
+            player_name = get('TOKEN_LOOKUP:%s' % token)
+            player = Player(player_name)
             return f(args[0], player, *args[1:], **kwargs)
         else:
             abort(403)

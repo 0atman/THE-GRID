@@ -1,4 +1,4 @@
-web:
+grid:
   build: .
   volumes:
     - .:/code
@@ -14,4 +14,4 @@ cli:
     - .:/code
   command: python cli.py
   links:
-    - web
+    - grid
