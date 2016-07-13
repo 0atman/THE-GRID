@@ -21,10 +21,10 @@ class Player(object):
             self.y = 0
             self.pow = 0
 
-        if self.name in get('GRID:%s,%s' % (str(self.x), str(self.y))):
+        if self.name not in get('GRID:%s,%s' % (str(self.x), str(self.y))):
             raise Exception(
-                "Already logged in. Try again. "
-                "If this is in error, please contact oatman@bgr0.com."
+                "Player no longer in room. This is an error."
+                "If this persists, please contact oatman@bgr0.com."
             )
 
         add_to_room(self)

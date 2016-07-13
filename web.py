@@ -22,9 +22,9 @@ api = Api(app)
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        token = request.args.get('token', None)
-        if token and player_name:
-            player_name = get('TOKEN_LOOKUP:%s' % token)
+        token = request.headers.get('token', None)
+        player_name = get('TOKEN_LOOKUP:%s' % token)
+        if player_name:
             player = Player(player_name)
             return f(args[0], player, *args[1:], **kwargs)
         else:
@@ -82,8 +82,8 @@ class World(Resource):
 
     @login_required
     def get(self, player):
-        x = 3
-        y = 3
+        x = player.x
+        y = player.y
         number = get_spiral_number(int(x), int(y))
         digest = sha1(str(number).encode('utf-8')).hexdigest()
         colour_tuple = (
@@ -105,18 +105,24 @@ class World(Resource):
         }
 
 class WorldPosition(Resource):
-    position_parser= reqparse.RequestParser()
-    position_parser.add_argument('move', dest='movement direction', type=str)
+    position_parser = reqparse.RequestParser()
+    position_parser.add_argument('direction', type=str)
 
     @login_required
     def put(self, player):
-        args = parser.parse_args()
+        args = self.position_parser.parse_args()
         direction = args['direction']
-        return direction
+        player_move = {
+            'up': player.up,
+            'down': player.down,
+            'left': player.left,
+            'right': player.right
+        }
+        return {'status':player_move[direction]()}
 
 api.add_resource(Token, '/token/')
 api.add_resource(World, '/world/')
-api.add_resource(WorldPosition, '/world/position/')
+api.add_resource(WorldPosition, '/world/position')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)

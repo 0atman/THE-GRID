@@ -31,6 +31,8 @@ def remove_from_room(player):
     }
     if room_data['players'].count(player.name):
         room_data['players'].remove(player.name)
+    else:
+        raise Exception('User not in room')
     put('GRID:%s,%s' % (str(player.x), str(player.y)), json.dumps(room_data))
 
 
